@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#ffffff" />
+  <title>Pause</title>
+  <style>
+    :root{
+      --bg:#f7f7f5; --card:#ffffff; --text:#171717; --muted:#6b6b6b;
+      --line:#e7e7e2; --accent:#111111; --soft:#efefeb;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      background:var(--bg); color:var(--text);
+    }
+    .wrap{max-width:560px;margin:0 auto;padding:24px 18px 40px}
+    h1{font-size:32px;margin:8px 0 4px}
+    .sub{color:var(--muted);margin-bottom:22px}
+    .card{
+      background:var(--card); border:1px solid var(--line); border-radius:18px;
+      padding:18px; box-shadow:0 2px 10px rgba(0,0,0,.03); margin-bottom:16px;
+    }
+    .question{font-size:20px;font-weight:700;margin-bottom:14px}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    button{
+      width:100%; padding:16px 12px; border:none; border-radius:14px;
+      background:var(--soft); font-size:17px; color:var(--text); cursor:pointer;
+    }
+    button.primary{background:var(--accent);color:white}
+    button.secondary{background:white;border:1px solid var(--line)}
+    .hidden{display:none}
+    .timer{font-size:52px;font-variant-numeric:tabular-nums;text-align:center;margin:12px 0}
+    .center{text-align:center}
+    .small{font-size:14px;color:var(--muted);line-height:1.5}
+    .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+    .stat{background:var(--soft);padding:12px;border-radius:12px;text-align:center}
+    .stat b{display:block;font-size:20px}
+    .footer{display:flex;gap:8px;margin-top:10px}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Pause</h1>
+  <div class="sub">先保留休息，再決定要不要抽。</div>
+
+  <div id="step1" class="card">
+    <div class="question">現在是哪一種？</div>
+    <div class="grid">
+      <button onclick="chooseTrigger('事情告段落')">事情告段落</button>
+      <button onclick="chooseTrigger('開會後')">開會後</button>
+      <button onclick="chooseTrigger('無聊')">無聊</button>
+      <button onclick="chooseTrigger('想事情')">想事情</button>
+      <button onclick="chooseTrigger('睡前')">睡前</button>
+      <button onclick="chooseTrigger('焦慮')">焦慮</button>
+      <button onclick="chooseTrigger('交際')">交際</button>
+      <button onclick="chooseTrigger('其他')">其他</button>
+    </div>
+  </div>
+
+  <div id="step2" class="card hidden">
+    <div class="question">先離開原位 3 分鐘</div>
+    <div class="small center">走一圈、看遠方，不滑手機。三分鐘後再決定。</div>
+    <div id="timer" class="timer">03:00</div>
+    <button id="startBtn" class="primary" onclick="startTimer()">開始</button>
+    <div style="height:8px"></div>
+    <button class="secondary" onclick="skipTimer()">我已經走完了</button>
+  </div>
+
+  <div id="step3" class="card hidden">
+    <div class="question">現在呢？</div>
+    <div class="grid">
+      <button class="primary" onclick="finish('沒抽')">沒抽</button>
+      <button onclick="finish('還是抽了')">還是抽了</button>
+      <button onclick="finish('延後了')">延後了</button>
+      <button onclick="finish('忘記想抽')">忘記想抽</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="question">今天</div>
+    <div class="stats">
+      <div class="stat"><b id="todayEvents">0</b>次想抽</div>
+      <div class="stat"><b id="todayNoSmoke">0</b>次沒抽</div>
+      <div class="stat"><b id="todaySmoked">0</b>次抽了</div>
+    </div>
+    <div class="footer">
+      <button class="secondary" onclick="exportCSV()">匯出 CSV</button>
+      <button class="secondary" onclick="showData()">看紀錄</button>
+    </div>
+    <div id="dataView" class="small hidden" style="margin-top:12px;white-space:pre-wrap"></div>
+  </div>
+
+  <div class="small">
+    這不是醫療建議工具。第一版只做行為觀察：trigger → 離開原場景 → 結果。
+  </div>
+</div>
+
+<script>
+let currentTrigger = null;
+let eventStart = null;
+let timerHandle = null;
+let remaining = 180;
+
+function logs(){
+  return JSON.parse(localStorage.getItem('pause_logs') || '[]');
+}
+function saveLogs(arr){
+  localStorage.setItem('pause_logs', JSON.stringify(arr));
+  refreshStats();
+}
+function chooseTrigger(t){
+  currentTrigger = t;
+  eventStart = new Date();
+  document.getElementById('step1').classList.add('hidden');
+  document.getElementById('step2').classList.remove('hidden');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function startTimer(){
+  document.getElementById('startBtn').disabled = true;
+  if(timerHandle) clearInterval(timerHandle);
+  remaining = 180;
+  updateTimer();
+  timerHandle = setInterval(()=>{
+    remaining--;
+    updateTimer();
+    if(remaining <= 0){
+      clearInterval(timerHandle);
+      timerHandle = null;
+      showOutcome();
+      if(navigator.vibrate) navigator.vibrate([200,100,200]);
+    }
+  },1000);
+}
+function updateTimer(){
+  const m = Math.floor(remaining/60).toString().padStart(2,'0');
+  const s = (remaining%60).toString().padStart(2,'0');
+  document.getElementById('timer').textContent = `${m}:${s}`;
+}
+function skipTimer(){
+  if(timerHandle) clearInterval(timerHandle);
+  timerHandle = null;
+  showOutcome();
+}
+function showOutcome(){
+  document.getElementById('step2').classList.add('hidden');
+  document.getElementById('step3').classList.remove('hidden');
+}
+function finish(result){
+  const arr = logs();
+  arr.push({
+    ts: new Date().toISOString(),
+    trigger: currentTrigger,
+    result: result,
+    elapsed_sec: eventStart ? Math.round((new Date()-eventStart)/1000) : null
+  });
+  saveLogs(arr);
+  currentTrigger = null;
+  eventStart = null;
+  remaining = 180;
+  updateTimer();
+  document.getElementById('startBtn').disabled = false;
+  document.getElementById('step3').classList.add('hidden');
+  document.getElementById('step1').classList.remove('hidden');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function refreshStats(){
+  const arr = logs();
+  const today = new Date().toLocaleDateString('sv-SE');
+  const todays = arr.filter(x => new Date(x.ts).toLocaleDateString('sv-SE') === today);
+  document.getElementById('todayEvents').textContent = todays.length;
+  document.getElementById('todayNoSmoke').textContent = todays.filter(x => x.result==='沒抽' || x.result==='忘記想抽').length;
+  document.getElementById('todaySmoked').textContent = todays.filter(x => x.result==='還是抽了').length;
+}
+function exportCSV(){
+  const arr = logs();
+  const rows = [['timestamp','trigger','result','elapsed_sec'], ...arr.map(x=>[x.ts,x.trigger,x.result,x.elapsed_sec ?? ''])];
+  const csv = rows.map(r => r.map(v => `"${String(v).replaceAll('"','""')}"`).join(',')).join('\n');
+  const blob = new Blob(["\uFEFF"+csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'pause-smoking-log.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+function showData(){
+  const box = document.getElementById('dataView');
+  const arr = logs().slice().reverse().slice(0,20);
+  box.textContent = arr.length ? arr.map(x=>{
+    const d=new Date(x.ts);
+    return `${d.toLocaleString()}｜${x.trigger} → ${x.result}`;
+  }).join('\n') : '還沒有紀錄';
+  box.classList.toggle('hidden');
+}
+refreshStats();
+</script>
+</body>
+</html>
