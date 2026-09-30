@@ -30,52 +30,101 @@
     }
     button.primary{background:var(--accent);color:white}
     button.secondary{background:white;border:1px solid var(--line)}
+    button.selected{outline:2px solid var(--accent);background:#e9e9e4}
     .hidden{display:none}
-    .timer{font-size:52px;font-variant-numeric:tabular-nums;text-align:center;margin:12px 0}
-    .center{text-align:center}
     .small{font-size:14px;color:var(--muted);line-height:1.5}
     .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
     .stat{background:var(--soft);padding:12px;border-radius:12px;text-align:center}
     .stat b{display:block;font-size:20px}
     .footer{display:flex;gap:8px;margin-top:10px}
+    textarea, input{
+      width:100%; padding:14px 12px; border:1px solid var(--line);
+      border-radius:12px; font-size:16px; background:white; color:var(--text);
+      font-family:inherit; -webkit-text-fill-color:var(--text);
+    }
+    input[type="datetime-local"]{
+      min-height:52px;
+      color-scheme:light;
+    }
+    input[type="datetime-local"]::-webkit-date-and-time-value{
+      text-align:left;
+      color:var(--text);
+    }
+    textarea{min-height:90px;resize:vertical}
   </style>
 </head>
 <body>
 <div class="wrap">
   <h1>Pause</h1>
-  <div class="sub">先保留休息，再決定要不要抽。</div>
+  <div class="sub">先記錄想抽的時刻，再看看後來有沒有真的抽。</div>
 
   <div id="step1" class="card">
-    <div class="question">現在是哪一種？</div>
+    <div class="question">現在為什麼想抽？</div>
     <div class="grid">
-      <button onclick="chooseTrigger('事情告段落')">事情告段落</button>
-      <button onclick="chooseTrigger('開會後')">開會後</button>
-      <button onclick="chooseTrigger('無聊')">無聊</button>
-      <button onclick="chooseTrigger('想事情')">想事情</button>
-      <button onclick="chooseTrigger('睡前')">睡前</button>
-      <button onclick="chooseTrigger('焦慮')">焦慮</button>
-      <button onclick="chooseTrigger('交際')">交際</button>
-      <button onclick="chooseTrigger('其他')">其他</button>
+      <button onclick="startEvent('事情告段落')">事情告段落</button>
+      <button onclick="startEvent('開會後')">開會後</button>
+      <button onclick="startEvent('無聊')">無聊</button>
+      <button onclick="startEvent('想事情')">想事情</button>
+      <button onclick="startEvent('睡前')">睡前</button>
+      <button onclick="startEvent('焦慮')">焦慮</button>
+      <button onclick="startEvent('交際')">交際</button>
+      <button onclick="startEvent('其他')">其他</button>
     </div>
+    <div style="height:10px"></div>
+    <button class="secondary" onclick="openBackfill()">補資料</button>
   </div>
 
   <div id="step2" class="card hidden">
-    <div class="question">先離開原位 3 分鐘</div>
-    <div class="small center">走一圈、看遠方，不滑手機。三分鐘後再決定。</div>
-    <div id="timer" class="timer">03:00</div>
-    <button id="startBtn" class="primary" onclick="startTimer()">開始</button>
+    <div class="question">先記下來了</div>
+    <div class="small">不用現在決定要不要抽。等一下有結果時，再回來補。</div>
+    <div style="height:12px"></div>
+    <button class="primary" onclick="chooseOutcome('有抽')">有抽</button>
     <div style="height:8px"></div>
-    <button class="secondary" onclick="skipTimer()">我已經走完了</button>
+    <button onclick="chooseOutcome('沒抽')">沒抽</button>
+    <div style="height:8px"></div>
   </div>
 
-  <div id="step3" class="card hidden">
-    <div class="question">現在呢？</div>
-    <div class="grid">
-      <button class="primary" onclick="finish('沒抽')">沒抽</button>
-      <button onclick="finish('還是抽了')">還是抽了</button>
-      <button onclick="finish('延後了')">延後了</button>
-      <button onclick="finish('忘記想抽')">忘記想抽</button>
+  <div id="noSmokeReasonCard" class="card hidden">
+    <div class="question">為什麼後來沒有抽？</div>
+    <textarea id="noSmokeReason" placeholder="隨便寫就好，例如：忙別的去了、出去走一圈就忘了、其實沒有很想抽…"></textarea>
+    <div style="height:10px"></div>
+    <button class="primary" onclick="saveNoSmokeReason()">儲存</button>
+  </div>
+
+  <div id="backfill" class="card hidden">
+    <div class="question">補一筆紀錄</div>
+
+    <div class="small" style="margin-bottom:6px">時間</div>
+    <input id="backfillTime" type="datetime-local">
+    <div class="small" style="margin-top:6px">點一下欄位即可選日期與時間</div>
+
+    <div class="small" style="margin:14px 0 8px">Trigger</div>
+    <div class="grid" id="backfillTriggers">
+      <button onclick="setBackfillTrigger('事情告段落', this)">事情告段落</button>
+      <button onclick="setBackfillTrigger('開會後', this)">開會後</button>
+      <button onclick="setBackfillTrigger('無聊', this)">無聊</button>
+      <button onclick="setBackfillTrigger('想事情', this)">想事情</button>
+      <button onclick="setBackfillTrigger('睡前', this)">睡前</button>
+      <button onclick="setBackfillTrigger('焦慮', this)">焦慮</button>
+      <button onclick="setBackfillTrigger('交際', this)">交際</button>
+      <button onclick="setBackfillTrigger('其他', this)">其他</button>
     </div>
+
+    <div class="small" style="margin:14px 0 8px">結果</div>
+    <div class="grid" id="backfillResults">
+      <button onclick="setBackfillResult('有抽', this)">有抽</button>
+      <button onclick="setBackfillResult('沒抽', this)">沒抽</button>
+    </div>
+
+    <div id="backfillReasonWrap" class="hidden">
+      <div class="small" style="margin:14px 0 8px">為什麼後來沒有抽？</div>
+      <textarea id="backfillReason" placeholder="可自由填寫"></textarea>
+    </div>
+
+    <div style="height:12px"></div>
+    <button class="primary" onclick="saveBackfill()">儲存</button>
+    <div style="height:8px"></div>
+    <button class="secondary" onclick="closeBackfill()">取消</button>
   </div>
 
   <div class="card">
@@ -83,7 +132,7 @@
     <div class="stats">
       <div class="stat"><b id="todayEvents">0</b>次想抽</div>
       <div class="stat"><b id="todayNoSmoke">0</b>次沒抽</div>
-      <div class="stat"><b id="todaySmoked">0</b>次抽了</div>
+      <div class="stat"><b id="todaySmoked">0</b>次有抽</div>
     </div>
     <div class="footer">
       <button class="secondary" onclick="exportCSV()">匯出 CSV</button>
@@ -93,15 +142,15 @@
   </div>
 
   <div class="small">
-    這不是醫療建議工具。第一版只做行為觀察：trigger → 離開原場景 → 結果。
+    目前只做行為觀察：trigger → 最後結果 → 如果沒抽，記下原因。
   </div>
 </div>
 
 <script>
-let currentTrigger = null;
-let eventStart = null;
-let timerHandle = null;
-let remaining = 180;
+let currentEvent = null;
+let pendingOutcome = null;
+let backfillTrigger = null;
+let backfillResult = null;
 
 function logs(){
   return JSON.parse(localStorage.getItem('pause_logs') || '[]');
@@ -110,72 +159,109 @@ function saveLogs(arr){
   localStorage.setItem('pause_logs', JSON.stringify(arr));
   refreshStats();
 }
-function chooseTrigger(t){
-  currentTrigger = t;
-  eventStart = new Date();
+function startEvent(trigger){
+  currentEvent = {
+    ts: new Date().toISOString(),
+    trigger,
+    result: null,
+    no_smoke_reason: ""
+  };
   document.getElementById('step1').classList.add('hidden');
   document.getElementById('step2').classList.remove('hidden');
   window.scrollTo({top:0,behavior:'smooth'});
 }
-function startTimer(){
-  document.getElementById('startBtn').disabled = true;
-  if(timerHandle) clearInterval(timerHandle);
-  remaining = 180;
-  updateTimer();
-  timerHandle = setInterval(()=>{
-    remaining--;
-    updateTimer();
-    if(remaining <= 0){
-      clearInterval(timerHandle);
-      timerHandle = null;
-      showOutcome();
-      if(navigator.vibrate) navigator.vibrate([200,100,200]);
-    }
-  },1000);
-}
-function updateTimer(){
-  const m = Math.floor(remaining/60).toString().padStart(2,'0');
-  const s = (remaining%60).toString().padStart(2,'0');
-  document.getElementById('timer').textContent = `${m}:${s}`;
-}
-function skipTimer(){
-  if(timerHandle) clearInterval(timerHandle);
-  timerHandle = null;
-  showOutcome();
-}
-function showOutcome(){
-  document.getElementById('step2').classList.add('hidden');
-  document.getElementById('step3').classList.remove('hidden');
-}
-function finish(result){
+function chooseOutcome(result){
+  pendingOutcome = result;
+  if(result === '沒抽'){
+    document.getElementById('step2').classList.add('hidden');
+    document.getElementById('noSmokeReasonCard').classList.remove('hidden');
+    document.getElementById('noSmokeReason').focus();
+    return;
+  }
+  currentEvent.result = result;
   const arr = logs();
-  arr.push({
-    ts: new Date().toISOString(),
-    trigger: currentTrigger,
-    result: result,
-    elapsed_sec: eventStart ? Math.round((new Date()-eventStart)/1000) : null
-  });
+  arr.push(currentEvent);
   saveLogs(arr);
-  currentTrigger = null;
-  eventStart = null;
-  remaining = 180;
-  updateTimer();
-  document.getElementById('startBtn').disabled = false;
-  document.getElementById('step3').classList.add('hidden');
+  resetFlow();
+}
+function saveNoSmokeReason(){
+  currentEvent.result = '沒抽';
+  currentEvent.no_smoke_reason = document.getElementById('noSmokeReason').value.trim();
+  const arr = logs();
+  arr.push(currentEvent);
+  saveLogs(arr);
+  resetFlow();
+}
+function resetFlow(){
+  currentEvent = null;
+  pendingOutcome = null;
+  document.getElementById('noSmokeReason').value = '';
+  document.getElementById('step2').classList.add('hidden');
+  document.getElementById('noSmokeReasonCard').classList.add('hidden');
   document.getElementById('step1').classList.remove('hidden');
   window.scrollTo({top:0,behavior:'smooth'});
 }
+
+function toLocalDatetimeValue(date){
+  const pad = n => String(n).padStart(2,'0');
+  return `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+function openBackfill(){
+  backfillTrigger = null;
+  backfillResult = null;
+  document.getElementById('backfillTime').value = toLocalDatetimeValue(new Date());
+  document.getElementById('backfillReason').value = '';
+  document.getElementById('backfillReasonWrap').classList.add('hidden');
+  document.querySelectorAll('#backfillTriggers button, #backfillResults button').forEach(b=>b.classList.remove('selected'));
+  document.getElementById('step1').classList.add('hidden');
+  document.getElementById('backfill').classList.remove('hidden');
+}
+function closeBackfill(){
+  document.getElementById('backfill').classList.add('hidden');
+  document.getElementById('step1').classList.remove('hidden');
+}
+function setBackfillTrigger(value, btn){
+  backfillTrigger = value;
+  document.querySelectorAll('#backfillTriggers button').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+function setBackfillResult(value, btn){
+  backfillResult = value;
+  document.querySelectorAll('#backfillResults button').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+  document.getElementById('backfillReasonWrap').classList.toggle('hidden', value !== '沒抽');
+}
+function saveBackfill(){
+  const t = document.getElementById('backfillTime').value;
+  if(!t || !backfillTrigger || !backfillResult){
+    alert('請選時間、Trigger 和結果');
+    return;
+  }
+  const arr = logs();
+  arr.push({
+    ts: new Date(t).toISOString(),
+    trigger: backfillTrigger,
+    result: backfillResult,
+    no_smoke_reason: backfillResult === '沒抽' ? document.getElementById('backfillReason').value.trim() : '',
+    backfilled: true
+  });
+  saveLogs(arr);
+  closeBackfill();
+}
+
 function refreshStats(){
   const arr = logs();
   const today = new Date().toLocaleDateString('sv-SE');
   const todays = arr.filter(x => new Date(x.ts).toLocaleDateString('sv-SE') === today);
   document.getElementById('todayEvents').textContent = todays.length;
-  document.getElementById('todayNoSmoke').textContent = todays.filter(x => x.result==='沒抽' || x.result==='忘記想抽').length;
-  document.getElementById('todaySmoked').textContent = todays.filter(x => x.result==='還是抽了').length;
+  document.getElementById('todayNoSmoke').textContent = todays.filter(x => x.result==='沒抽').length;
+  document.getElementById('todaySmoked').textContent = todays.filter(x => x.result==='有抽').length;
 }
 function exportCSV(){
   const arr = logs();
-  const rows = [['timestamp','trigger','result','elapsed_sec'], ...arr.map(x=>[x.ts,x.trigger,x.result,x.elapsed_sec ?? ''])];
+  const rows = [['timestamp','trigger','result','no_smoke_reason','backfilled'],
+    ...arr.map(x=>[x.ts,x.trigger,x.result||'',x.no_smoke_reason||'',x.backfilled?'yes':'no'])
+  ];
   const csv = rows.map(r => r.map(v => `"${String(v).replaceAll('"','""')}"`).join(',')).join('\n');
   const blob = new Blob(["\uFEFF"+csv], {type:'text/csv;charset=utf-8;'});
   const url = URL.createObjectURL(blob);
@@ -190,7 +276,8 @@ function showData(){
   const arr = logs().slice().reverse().slice(0,20);
   box.textContent = arr.length ? arr.map(x=>{
     const d=new Date(x.ts);
-    return `${d.toLocaleString()}｜${x.trigger} → ${x.result}`;
+    const reason = x.no_smoke_reason ? `｜沒抽原因：${x.no_smoke_reason}` : '';
+    return `${d.toLocaleString()}｜${x.trigger} → ${x.result || '未填'}${reason}`;
   }).join('\n') : '還沒有紀錄';
   box.classList.toggle('hidden');
 }
