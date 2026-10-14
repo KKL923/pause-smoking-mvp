@@ -6,282 +6,52 @@
   <meta name="theme-color" content="#ffffff" />
   <title>Pause</title>
   <style>
-    :root{
-      --bg:#f7f7f5; --card:#ffffff; --text:#171717; --muted:#6b6b6b;
-      --line:#e7e7e2; --accent:#111111; --soft:#efefeb;
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-      background:var(--bg); color:var(--text);
-    }
-    .wrap{max-width:560px;margin:0 auto;padding:24px 18px 40px}
-    h1{font-size:32px;margin:8px 0 4px}
-    .sub{color:var(--muted);margin-bottom:22px}
-    .card{
-      background:var(--card); border:1px solid var(--line); border-radius:18px;
-      padding:18px; box-shadow:0 2px 10px rgba(0,0,0,.03); margin-bottom:16px;
-    }
-    .question{font-size:20px;font-weight:700;margin-bottom:14px}
-    .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-    button{
-      width:100%; padding:16px 12px; border:none; border-radius:14px;
-      background:var(--soft); font-size:17px; color:var(--text); cursor:pointer;
-    }
-    button.primary{background:var(--accent);color:white}
-    button.secondary{background:white;border:1px solid var(--line)}
-    button.selected{outline:2px solid var(--accent);background:#e9e9e4}
-    .hidden{display:none}
-    .small{font-size:14px;color:var(--muted);line-height:1.5}
-    .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
-    .stat{background:var(--soft);padding:12px;border-radius:12px;text-align:center}
-    .stat b{display:block;font-size:20px}
-    .footer{display:flex;gap:8px;margin-top:10px}
-    textarea, input{
-      width:100%; padding:14px 12px; border:1px solid var(--line);
-      border-radius:12px; font-size:16px; background:white; color:var(--text);
-      font-family:inherit; -webkit-text-fill-color:var(--text);
-    }
-    input[type="datetime-local"]{
-      min-height:52px;
-      color-scheme:light;
-    }
-    input[type="datetime-local"]::-webkit-date-and-time-value{
-      text-align:left;
-      color:var(--text);
-    }
-    textarea{min-height:90px;resize:vertical}
+    :root{--bg:#f7f7f5;--card:#ffffff;--text:#171717;--muted:#6b6b6b;--line:#e7e7e2;--accent:#111111;--soft:#efefeb}
+    *{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text)}
+    .wrap{max-width:560px;margin:0 auto;padding:24px 18px 40px}h1{font-size:32px;margin:8px 0 4px}.sub{color:var(--muted);margin-bottom:22px}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:0 2px 10px rgba(0,0,0,.03);margin-bottom:16px}.question{font-size:20px;font-weight:700;margin-bottom:14px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    button{width:100%;padding:16px 12px;border:none;border-radius:14px;background:var(--soft);font-size:17px;color:var(--text);cursor:pointer}button.primary{background:var(--accent);color:#fff}button.secondary{background:#fff;border:1px solid var(--line)}button.selected{outline:2px solid var(--accent);background:#e9e9e4}button.smallbtn{padding:9px 10px;font-size:14px;width:auto}.hidden{display:none}.small{font-size:14px;color:var(--muted);line-height:1.5}
+    .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.stat{background:var(--soft);padding:12px;border-radius:12px;text-align:center}.stat b{display:block;font-size:20px}.footer{display:flex;gap:8px;margin-top:10px}
+    textarea,input{width:100%;padding:14px 12px;border:1px solid var(--line);border-radius:12px;font-size:16px;background:#fff;color:var(--text);font-family:inherit;-webkit-text-fill-color:var(--text)}input[type="datetime-local"]{min-height:52px;color-scheme:light}input[type="datetime-local"]::-webkit-date-and-time-value{text-align:left;color:var(--text)}textarea{min-height:90px;resize:vertical}.record{padding:12px 0;border-top:1px solid var(--line)}.record:first-child{border-top:none}.record-main{font-size:15px;line-height:1.5}.record-actions{margin-top:8px}
   </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>Pause</h1>
-  <div class="sub">先記錄想抽的時刻，再看看後來有沒有真的抽。</div>
-
-  <div id="step1" class="card">
-    <div class="question">現在為什麼想抽？</div>
-    <div class="grid">
-      <button onclick="startEvent('事情告段落')">事情告段落</button>
-      <button onclick="startEvent('開會後')">開會後</button>
-      <button onclick="startEvent('無聊')">無聊</button>
-      <button onclick="startEvent('想事情')">想事情</button>
-      <button onclick="startEvent('睡前')">睡前</button>
-      <button onclick="startEvent('焦慮')">焦慮</button>
-      <button onclick="startEvent('交際')">交際</button>
-      <button onclick="startEvent('其他')">其他</button>
-    </div>
-    <div style="height:10px"></div>
-    <button class="secondary" onclick="openBackfill()">補資料</button>
-  </div>
-
-  <div id="step2" class="card hidden">
-    <div class="question">先記下來了</div>
-    <div class="small">不用現在決定要不要抽。等一下有結果時，再回來補。</div>
-    <div style="height:12px"></div>
-    <button class="primary" onclick="chooseOutcome('有抽')">有抽</button>
-    <div style="height:8px"></div>
-    <button onclick="chooseOutcome('沒抽')">沒抽</button>
-    <div style="height:8px"></div>
-  </div>
-
-  <div id="noSmokeReasonCard" class="card hidden">
-    <div class="question">為什麼後來沒有抽？</div>
-    <textarea id="noSmokeReason" placeholder="隨便寫就好，例如：忙別的去了、出去走一圈就忘了、其實沒有很想抽…"></textarea>
-    <div style="height:10px"></div>
-    <button class="primary" onclick="saveNoSmokeReason()">儲存</button>
-  </div>
-
-  <div id="backfill" class="card hidden">
-    <div class="question">補一筆紀錄</div>
-
-    <div class="small" style="margin-bottom:6px">時間</div>
-    <input id="backfillTime" type="datetime-local">
-    <div class="small" style="margin-top:6px">點一下欄位即可選日期與時間</div>
-
-    <div class="small" style="margin:14px 0 8px">Trigger</div>
-    <div class="grid" id="backfillTriggers">
-      <button onclick="setBackfillTrigger('事情告段落', this)">事情告段落</button>
-      <button onclick="setBackfillTrigger('開會後', this)">開會後</button>
-      <button onclick="setBackfillTrigger('無聊', this)">無聊</button>
-      <button onclick="setBackfillTrigger('想事情', this)">想事情</button>
-      <button onclick="setBackfillTrigger('睡前', this)">睡前</button>
-      <button onclick="setBackfillTrigger('焦慮', this)">焦慮</button>
-      <button onclick="setBackfillTrigger('交際', this)">交際</button>
-      <button onclick="setBackfillTrigger('其他', this)">其他</button>
-    </div>
-
-    <div class="small" style="margin:14px 0 8px">結果</div>
-    <div class="grid" id="backfillResults">
-      <button onclick="setBackfillResult('有抽', this)">有抽</button>
-      <button onclick="setBackfillResult('沒抽', this)">沒抽</button>
-    </div>
-
-    <div id="backfillReasonWrap" class="hidden">
-      <div class="small" style="margin:14px 0 8px">為什麼後來沒有抽？</div>
-      <textarea id="backfillReason" placeholder="可自由填寫"></textarea>
-    </div>
-
-    <div style="height:12px"></div>
-    <button class="primary" onclick="saveBackfill()">儲存</button>
-    <div style="height:8px"></div>
-    <button class="secondary" onclick="closeBackfill()">取消</button>
-  </div>
-
-  <div class="card">
-    <div class="question">今天</div>
-    <div class="stats">
-      <div class="stat"><b id="todayEvents">0</b>次想抽</div>
-      <div class="stat"><b id="todayNoSmoke">0</b>次沒抽</div>
-      <div class="stat"><b id="todaySmoked">0</b>次有抽</div>
-    </div>
-    <div class="footer">
-      <button class="secondary" onclick="exportCSV()">匯出 CSV</button>
-      <button class="secondary" onclick="showData()">看紀錄</button>
-    </div>
-    <div id="dataView" class="small hidden" style="margin-top:12px;white-space:pre-wrap"></div>
-  </div>
-
-  <div class="small">
-    目前只做行為觀察：trigger → 最後結果 → 如果沒抽，記下原因。
-  </div>
+  <h1>Pause</h1><div class="sub">先記錄想抽的時刻，再看看後來有沒有真的抽。</div>
+  <div id="step1" class="card"><div class="question">現在為什麼想抽？</div><div class="grid">
+    <button onclick="startEvent('事情告段落')">事情告段落</button><button onclick="startEvent('進入狀態')">進入狀態</button><button onclick="startEvent('開會後')">開會後</button><button onclick="startEvent('無聊')">無聊</button><button onclick="startEvent('想事情')">想事情</button><button onclick="startEvent('睡前')">睡前</button><button onclick="startEvent('焦慮')">焦慮</button><button onclick="startEvent('交際')">交際</button><button onclick="openOtherTrigger()">其他</button>
+  </div><div style="height:10px"></div><button class="secondary" onclick="openBackfill()">補資料</button></div>
+  <div id="otherTriggerCard" class="card hidden"><div class="question">其他是什麼？</div><input id="otherTriggerText" type="text" placeholder="簡單寫就好"><div style="height:10px"></div><button class="primary" onclick="saveOtherTrigger()">下一步</button><div style="height:8px"></div><button class="secondary" onclick="backToTriggers()">上一步</button></div>
+  <div id="step2" class="card hidden"><div class="question">先記下來了</div><div class="small">不用現在決定要不要抽。等一下有結果時，再回來補。</div><div style="height:12px"></div><button class="primary" onclick="chooseOutcome('有抽')">有抽</button><div style="height:8px"></div><button onclick="chooseOutcome('沒抽')">沒抽</button><div style="height:8px"></div><button class="secondary" onclick="backToTriggers()">上一步</button></div>
+  <div id="noSmokeReasonCard" class="card hidden"><div class="question">為什麼後來沒有抽？</div><textarea id="noSmokeReason" placeholder="例如：忙別的去了、懶得出去、上一根太近…"></textarea><div style="height:10px"></div><button class="primary" onclick="saveNoSmokeReason()">儲存</button><div style="height:8px"></div><button class="secondary" onclick="backToOutcome()">上一步</button></div>
+  <div id="backfill" class="card hidden"><div class="question">補一筆紀錄</div><div class="small" style="margin-bottom:6px">時間</div><input id="backfillTime" type="datetime-local"><div class="small" style="margin:14px 0 8px">Trigger</div><div class="grid" id="backfillTriggers">
+    <button onclick="setBackfillTrigger('事情告段落',this)">事情告段落</button><button onclick="setBackfillTrigger('進入狀態',this)">進入狀態</button><button onclick="setBackfillTrigger('開會後',this)">開會後</button><button onclick="setBackfillTrigger('無聊',this)">無聊</button><button onclick="setBackfillTrigger('想事情',this)">想事情</button><button onclick="setBackfillTrigger('睡前',this)">睡前</button><button onclick="setBackfillTrigger('焦慮',this)">焦慮</button><button onclick="setBackfillTrigger('交際',this)">交際</button><button onclick="setBackfillTrigger('其他',this)">其他</button>
+  </div><div id="backfillOtherWrap" class="hidden"><div class="small" style="margin:14px 0 8px">其他原因</div><input id="backfillOther" type="text" placeholder="簡單寫就好"></div><div class="small" style="margin:14px 0 8px">結果</div><div class="grid" id="backfillResults"><button onclick="setBackfillResult('有抽',this)">有抽</button><button onclick="setBackfillResult('沒抽',this)">沒抽</button></div><div id="backfillReasonWrap" class="hidden"><div class="small" style="margin:14px 0 8px">為什麼後來沒有抽？</div><textarea id="backfillReason" placeholder="可自由填寫"></textarea></div><div style="height:12px"></div><button class="primary" onclick="saveBackfill()">儲存</button><div style="height:8px"></div><button class="secondary" onclick="closeBackfill()">取消</button></div>
+  <div id="editCard" class="card hidden"><div class="question">編輯紀錄</div><div class="small" style="margin-bottom:6px">時間</div><input id="editTime" type="datetime-local"><div class="small" style="margin:14px 0 8px">Trigger</div><div class="grid" id="editTriggers"></div><div id="editOtherWrap" class="hidden"><div class="small" style="margin:14px 0 8px">其他原因</div><input id="editOther" type="text" placeholder="簡單寫就好"></div><div class="small" style="margin:14px 0 8px">結果</div><div class="grid" id="editResults"><button onclick="setEditResult('有抽',this)">有抽</button><button onclick="setEditResult('沒抽',this)">沒抽</button></div><div id="editReasonWrap" class="hidden"><div class="small" style="margin:14px 0 8px">為什麼後來沒有抽？</div><textarea id="editReason" placeholder="可自由填寫"></textarea></div><div style="height:12px"></div><button class="primary" onclick="saveEdit()">儲存修改</button><div style="height:8px"></div><button class="secondary" onclick="closeEdit()">取消</button></div>
+  <div class="card"><div class="question">今天</div><div class="stats"><div class="stat"><b id="todayEvents">0</b>次想抽</div><div class="stat"><b id="todayNoSmoke">0</b>次沒抽</div><div class="stat"><b id="todaySmoked">0</b>次有抽</div></div><div class="footer"><button class="secondary" onclick="exportCSV()">匯出 CSV</button><button class="secondary" onclick="toggleRecords()">看紀錄</button></div><div id="recordsView" class="hidden" style="margin-top:12px"></div></div>
+  <div class="small">目前只做行為觀察：trigger → 最後結果 → 如果沒抽，記下原因。</div>
 </div>
-
 <script>
-let currentEvent = null;
-let pendingOutcome = null;
-let backfillTrigger = null;
-let backfillResult = null;
-
-function logs(){
-  return JSON.parse(localStorage.getItem('pause_logs') || '[]');
-}
-function saveLogs(arr){
-  localStorage.setItem('pause_logs', JSON.stringify(arr));
-  refreshStats();
-}
-function startEvent(trigger){
-  currentEvent = {
-    ts: new Date().toISOString(),
-    trigger,
-    result: null,
-    no_smoke_reason: ""
-  };
-  document.getElementById('step1').classList.add('hidden');
-  document.getElementById('step2').classList.remove('hidden');
-  window.scrollTo({top:0,behavior:'smooth'});
-}
-function chooseOutcome(result){
-  pendingOutcome = result;
-  if(result === '沒抽'){
-    document.getElementById('step2').classList.add('hidden');
-    document.getElementById('noSmokeReasonCard').classList.remove('hidden');
-    document.getElementById('noSmokeReason').focus();
-    return;
-  }
-  currentEvent.result = result;
-  const arr = logs();
-  arr.push(currentEvent);
-  saveLogs(arr);
-  resetFlow();
-}
-function saveNoSmokeReason(){
-  currentEvent.result = '沒抽';
-  currentEvent.no_smoke_reason = document.getElementById('noSmokeReason').value.trim();
-  const arr = logs();
-  arr.push(currentEvent);
-  saveLogs(arr);
-  resetFlow();
-}
-function resetFlow(){
-  currentEvent = null;
-  pendingOutcome = null;
-  document.getElementById('noSmokeReason').value = '';
-  document.getElementById('step2').classList.add('hidden');
-  document.getElementById('noSmokeReasonCard').classList.add('hidden');
-  document.getElementById('step1').classList.remove('hidden');
-  window.scrollTo({top:0,behavior:'smooth'});
-}
-
-function toLocalDatetimeValue(date){
-  const pad = n => String(n).padStart(2,'0');
-  return `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
-}
-function openBackfill(){
-  backfillTrigger = null;
-  backfillResult = null;
-  document.getElementById('backfillTime').value = toLocalDatetimeValue(new Date());
-  document.getElementById('backfillReason').value = '';
-  document.getElementById('backfillReasonWrap').classList.add('hidden');
-  document.querySelectorAll('#backfillTriggers button, #backfillResults button').forEach(b=>b.classList.remove('selected'));
-  document.getElementById('step1').classList.add('hidden');
-  document.getElementById('backfill').classList.remove('hidden');
-}
-function closeBackfill(){
-  document.getElementById('backfill').classList.add('hidden');
-  document.getElementById('step1').classList.remove('hidden');
-}
-function setBackfillTrigger(value, btn){
-  backfillTrigger = value;
-  document.querySelectorAll('#backfillTriggers button').forEach(b=>b.classList.remove('selected'));
-  btn.classList.add('selected');
-}
-function setBackfillResult(value, btn){
-  backfillResult = value;
-  document.querySelectorAll('#backfillResults button').forEach(b=>b.classList.remove('selected'));
-  btn.classList.add('selected');
-  document.getElementById('backfillReasonWrap').classList.toggle('hidden', value !== '沒抽');
-}
-function saveBackfill(){
-  const t = document.getElementById('backfillTime').value;
-  if(!t || !backfillTrigger || !backfillResult){
-    alert('請選時間、Trigger 和結果');
-    return;
-  }
-  const arr = logs();
-  arr.push({
-    ts: new Date(t).toISOString(),
-    trigger: backfillTrigger,
-    result: backfillResult,
-    no_smoke_reason: backfillResult === '沒抽' ? document.getElementById('backfillReason').value.trim() : '',
-    backfilled: true
-  });
-  saveLogs(arr);
-  closeBackfill();
-}
-
-function refreshStats(){
-  const arr = logs();
-  const today = new Date().toLocaleDateString('sv-SE');
-  const todays = arr.filter(x => new Date(x.ts).toLocaleDateString('sv-SE') === today);
-  document.getElementById('todayEvents').textContent = todays.length;
-  document.getElementById('todayNoSmoke').textContent = todays.filter(x => x.result==='沒抽').length;
-  document.getElementById('todaySmoked').textContent = todays.filter(x => x.result==='有抽').length;
-}
-function exportCSV(){
-  const arr = logs();
-  const rows = [['timestamp','trigger','result','no_smoke_reason','backfilled'],
-    ...arr.map(x=>[x.ts,x.trigger,x.result||'',x.no_smoke_reason||'',x.backfilled?'yes':'no'])
-  ];
-  const csv = rows.map(r => r.map(v => `"${String(v).replaceAll('"','""')}"`).join(',')).join('\n');
-  const blob = new Blob(["\uFEFF"+csv], {type:'text/csv;charset=utf-8;'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'pause-smoking-log.csv';
-  a.click();
-  URL.revokeObjectURL(url);
-}
-function showData(){
-  const box = document.getElementById('dataView');
-  const arr = logs().slice().reverse().slice(0,20);
-  box.textContent = arr.length ? arr.map(x=>{
-    const d=new Date(x.ts);
-    const reason = x.no_smoke_reason ? `｜沒抽原因：${x.no_smoke_reason}` : '';
-    return `${d.toLocaleString()}｜${x.trigger} → ${x.result || '未填'}${reason}`;
-  }).join('\n') : '還沒有紀錄';
-  box.classList.toggle('hidden');
-}
-refreshStats();
-</script>
-</body>
-</html>
+const TRIGGERS=['事情告段落','進入狀態','開會後','無聊','想事情','睡前','焦慮','交際','其他'];let currentEvent=null,backfillTrigger=null,backfillResult=null,editIndex=null,editTrigger=null,editResult=null;
+function logs(){return JSON.parse(localStorage.getItem('pause_logs')||'[]')}function saveLogs(arr){localStorage.setItem('pause_logs',JSON.stringify(arr));refreshStats();renderRecords()}function hideAllFlowCards(){['step1','otherTriggerCard','step2','noSmokeReasonCard','backfill','editCard'].forEach(id=>document.getElementById(id).classList.add('hidden'))}
+function startEvent(trigger){currentEvent={ts:new Date().toISOString(),trigger,trigger_note:'',result:null,no_smoke_reason:''};hideAllFlowCards();document.getElementById('step2').classList.remove('hidden')}
+function openOtherTrigger(){currentEvent={ts:new Date().toISOString(),trigger:'其他',trigger_note:'',result:null,no_smoke_reason:''};document.getElementById('otherTriggerText').value='';hideAllFlowCards();document.getElementById('otherTriggerCard').classList.remove('hidden');document.getElementById('otherTriggerText').focus()}
+function saveOtherTrigger(){currentEvent.trigger_note=document.getElementById('otherTriggerText').value.trim();hideAllFlowCards();document.getElementById('step2').classList.remove('hidden')}function backToTriggers(){currentEvent=null;hideAllFlowCards();document.getElementById('step1').classList.remove('hidden')}function backToOutcome(){document.getElementById('noSmokeReasonCard').classList.add('hidden');document.getElementById('step2').classList.remove('hidden')}
+function chooseOutcome(result){if(result==='沒抽'){hideAllFlowCards();document.getElementById('noSmokeReasonCard').classList.remove('hidden');document.getElementById('noSmokeReason').focus();return}currentEvent.result=result;const arr=logs();arr.push(currentEvent);saveLogs(arr);resetFlow()}
+function saveNoSmokeReason(){currentEvent.result='沒抽';currentEvent.no_smoke_reason=document.getElementById('noSmokeReason').value.trim();const arr=logs();arr.push(currentEvent);saveLogs(arr);resetFlow()}function resetFlow(){currentEvent=null;document.getElementById('noSmokeReason').value='';hideAllFlowCards();document.getElementById('step1').classList.remove('hidden');window.scrollTo({top:0,behavior:'smooth'})}
+function toLocalDatetimeValue(date){const pad=n=>String(n).padStart(2,'0');return `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`}
+function openBackfill(){backfillTrigger=null;backfillResult=null;document.getElementById('backfillTime').value=toLocalDatetimeValue(new Date());document.getElementById('backfillReason').value='';document.getElementById('backfillOther').value='';document.getElementById('backfillReasonWrap').classList.add('hidden');document.getElementById('backfillOtherWrap').classList.add('hidden');document.querySelectorAll('#backfillTriggers button,#backfillResults button').forEach(b=>b.classList.remove('selected'));hideAllFlowCards();document.getElementById('backfill').classList.remove('hidden')}
+function closeBackfill(){hideAllFlowCards();document.getElementById('step1').classList.remove('hidden')}function setBackfillTrigger(value,btn){backfillTrigger=value;document.querySelectorAll('#backfillTriggers button').forEach(b=>b.classList.remove('selected'));btn.classList.add('selected');document.getElementById('backfillOtherWrap').classList.toggle('hidden',value!=='其他')}function setBackfillResult(value,btn){backfillResult=value;document.querySelectorAll('#backfillResults button').forEach(b=>b.classList.remove('selected'));btn.classList.add('selected');document.getElementById('backfillReasonWrap').classList.toggle('hidden',value!=='沒抽')}
+function saveBackfill(){const t=document.getElementById('backfillTime').value;if(!t||!backfillTrigger||!backfillResult){alert('請選時間、Trigger 和結果');return}const arr=logs();arr.push({ts:new Date(t).toISOString(),trigger:backfillTrigger,trigger_note:backfillTrigger==='其他'?document.getElementById('backfillOther').value.trim():'',result:backfillResult,no_smoke_reason:backfillResult==='沒抽'?document.getElementById('backfillReason').value.trim():'',backfilled:true});saveLogs(arr);closeBackfill()}
+function refreshStats(){const arr=logs(),today=new Date().toLocaleDateString('sv-SE'),todays=arr.filter(x=>new Date(x.ts).toLocaleDateString('sv-SE')===today);document.getElementById('todayEvents').textContent=todays.length;document.getElementById('todayNoSmoke').textContent=todays.filter(x=>x.result==='沒抽').length;document.getElementById('todaySmoked').textContent=todays.filter(x=>x.result==='有抽').length}
+function escapeHtml(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function renderRecords(){const box=document.getElementById('recordsView'),arr=logs(),items=arr.map((x,i)=>({x,i})).reverse().slice(0,30);box.innerHTML=items.length?items.map(({x,i})=>{const d=new Date(x.ts),note=x.trigger_note?`（${escapeHtml(x.trigger_note)}）`:'',reason=x.no_smoke_reason?`<div class="small">沒抽原因：${escapeHtml(x.no_smoke_reason)}</div>`:'';return `<div class="record"><div class="record-main">${d.toLocaleString()}｜${escapeHtml(x.trigger||'')} ${note}→ ${escapeHtml(x.result||'未填')}</div>${reason}<div class="record-actions"><button class="secondary smallbtn" onclick="openEdit(${i})">編輯</button></div></div>`}).join(''):'<div class="small">還沒有紀錄</div>'}
+function toggleRecords(){const box=document.getElementById('recordsView');renderRecords();box.classList.toggle('hidden')}
+function buildEditTriggers(){document.getElementById('editTriggers').innerHTML=TRIGGERS.map(t=>`<button onclick="setEditTrigger('${t}',this)">${t}</button>`).join('')}
+function openEdit(i){const arr=logs(),x=arr[i];if(!x)return;editIndex=i;editTrigger=x.trigger||'';editResult=x.result||'';buildEditTriggers();document.getElementById('editTime').value=toLocalDatetimeValue(new Date(x.ts));document.getElementById('editOther').value=x.trigger_note||'';document.getElementById('editReason').value=x.no_smoke_reason||'';document.querySelectorAll('#editTriggers button').forEach(b=>{if(b.textContent===editTrigger)b.classList.add('selected')});document.querySelectorAll('#editResults button').forEach(b=>{if(b.textContent===editResult)b.classList.add('selected')});document.getElementById('editOtherWrap').classList.toggle('hidden',editTrigger!=='其他');document.getElementById('editReasonWrap').classList.toggle('hidden',editResult!=='沒抽');hideAllFlowCards();document.getElementById('editCard').classList.remove('hidden');window.scrollTo({top:0,behavior:'smooth'})}
+function setEditTrigger(value,btn){editTrigger=value;document.querySelectorAll('#editTriggers button').forEach(b=>b.classList.remove('selected'));btn.classList.add('selected');document.getElementById('editOtherWrap').classList.toggle('hidden',value!=='其他')}function setEditResult(value,btn){editResult=value;document.querySelectorAll('#editResults button').forEach(b=>b.classList.remove('selected'));btn.classList.add('selected');document.getElementById('editReasonWrap').classList.toggle('hidden',value!=='沒抽')}
+function saveEdit(){const t=document.getElementById('editTime').value;if(editIndex===null||!t||!editTrigger||!editResult){alert('請確認時間、Trigger 和結果');return}const arr=logs(),old=arr[editIndex]||{};arr[editIndex]={...old,ts:new Date(t).toISOString(),trigger:editTrigger,trigger_note:editTrigger==='其他'?document.getElementById('editOther').value.trim():'',result:editResult,no_smoke_reason:editResult==='沒抽'?document.getElementById('editReason').value.trim():''};saveLogs(arr);closeEdit()}
+function closeEdit(){editIndex=null;editTrigger=null;editResult=null;hideAllFlowCards();document.getElementById('step1').classList.remove('hidden')}
+function exportCSV(){const arr=logs(),rows=[['timestamp','trigger','trigger_note','result','no_smoke_reason','backfilled'],...arr.map(x=>[x.ts,x.trigger||'',x.trigger_note||'',x.result||'',x.no_smoke_reason||'',x.backfilled?'yes':'no'])],csv=rows.map(r=>r.map(v=>`"${String(v).replaceAll('"','""')}"`).join(',')).join('\n'),blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='pause-smoking-log.csv';a.click();URL.revokeObjectURL(url)}
+refreshStats();renderRecords();
+</script></body></html>
